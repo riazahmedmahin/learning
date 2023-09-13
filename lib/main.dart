@@ -57,7 +57,8 @@ class Home extends StatelessWidget {
         body: TabBarView(
           children: [
 
-            Text1(), Text2(),///////////
+            Text1(),
+            Text2(),///////////
 
 
           ],
