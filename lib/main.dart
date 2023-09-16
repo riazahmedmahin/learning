@@ -7,7 +7,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,53 +18,49 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:Home(),
+      home:  MyHomePage(),
     );
   }
 }
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+
+class MyHomePage extends StatelessWidget {
+  MyHomePage({super.key});
+
+
+  var My_List = [
+    "Apples",
+    "Bannanas",
+    "Bread",
+    "Milk",
+    "Egges",
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return Scaffold(
+      appBar: AppBar(
 
-      length: 12,
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.blue,
-          //title: Text("Profile"),
-          //centerTitle: true,
-          bottom: TabBar(
-              isScrollable: true,
-              tabs: [
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-                Tab(icon: Icon(Icons.add_card),text: "Home",),
-          ]),
-        ),
-        body: TabBarView(
-          children: [
-            //checkout new
+        backgroundColor: Colors.blue,
+        title: Text("My Shopping List",style: TextStyle(color: Colors.white),),centerTitle: true,
 
-
-
-
-          ],
-
-        ),
-
-
-
+        actions: [
+          Icon(Icons.shopping_cart,color: Colors.white,),
+        ],
       ),
+      body:ListView.builder(
+          itemCount: My_List.length,
+
+          itemBuilder: (context,index){
+            return ListTile(
+              title: Text(My_List[index]),
+              leading: Icon(Icons.shopping_basket),
+            );
+          }),
+
     );
   }
 }
+
+
+
