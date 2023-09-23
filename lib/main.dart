@@ -8,8 +8,9 @@ class Product {
   final String name;
   final double price;
   int quantity;
+  bool isSelected;
 
-  Product({required this.name, required this.price, this.quantity = 0});
+  Product({required this.name, required this.price, this.quantity = 0, this.isSelected = false});
 }
 
 class MyApp extends StatelessWidget {
@@ -34,6 +35,7 @@ class ProductList extends StatefulWidget {
 class _ProductListState extends State<ProductList> {
 
   List<Product> products = [
+
     Product(name: 'Product 1', price: 10.99),
     Product(name: 'Product 2', price: 19.99),
     Product(name: 'Product 3', price: 5.419),
@@ -51,7 +53,9 @@ class _ProductListState extends State<ProductList> {
   void _buyProduct(int index) {
 
     setState(() {
+
       products[index].quantity++;
+      products[index].isSelected = true;
       if (products[index].quantity == 5) {
         showDialog(
           context: context,
@@ -67,12 +71,9 @@ class _ProductListState extends State<ProductList> {
                   child: Text('OK'),
                 ),
               ],
-            );
-          },
-        );
+            );},);
       }
-    }
-    );
+    });
   }
 
   @override
@@ -92,22 +93,27 @@ class _ProductListState extends State<ProductList> {
             trailing: Column(
 
               children: [
-                Text('counter ${products[index].quantity}'),
+                Text('Counter ${products[index].quantity}'),
                 ElevatedButton(
                   onPressed: () => _buyProduct(index),
                   child: Text("Buy Now"),
                 ),
-              ],
+                ],
+               ),
+           );
+        },
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+
+          final selectedProducts = products.where((product) => product.isSelected).toList();
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CartPage(selectedProducts: selectedProducts),
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(onPressed: (){
-
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => CartPage(totalQuantity: totalQuantity),
-        ));
-      },
         backgroundColor: Colors.blue,
         child: Icon(Icons.shopping_cart),
       ),
@@ -116,9 +122,9 @@ class _ProductListState extends State<ProductList> {
 }
 
 class CartPage extends StatelessWidget {
-  final int totalQuantity;
+  final List<Product> selectedProducts;
 
-  CartPage({required this.totalQuantity});
+  CartPage({required this.selectedProducts});
 
   @override
   Widget build(BuildContext context) {
@@ -127,8 +133,19 @@ class CartPage extends StatelessWidget {
         title: Text('Cart'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Text('Total Quantity: $totalQuantity'),
+      body: ListView.builder(
+        itemCount: selectedProducts.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(selectedProducts[index].name),
+            subtitle: Text('\$${selectedProducts[index].price.toStringAsFixed(2)}'),
+            trailing: Column(
+              children: [
+                Text('Quantity: ${selectedProducts[index].quantity}'),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
