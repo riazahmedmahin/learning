@@ -4,148 +4,100 @@ void main() {
   runApp(MyApp());
 }
 
-class Product {
-  final String name;
-  final double price;
-  int quantity;
-  bool isSelected;
-
-  Product({required this.name, required this.price, this.quantity = 0, this.isSelected = false});
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Product App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ProductList(),
+      title: 'Flutter Counter App',
+      home: CounterScreen(),
     );
   }
 }
 
-class ProductList extends StatefulWidget {
+class CounterScreen extends StatefulWidget {
   @override
-  _ProductListState createState() => _ProductListState();
+  _CounterScreenState createState() => _CounterScreenState();
 }
 
-class _ProductListState extends State<ProductList> {
+class _CounterScreenState extends State<CounterScreen> {
+  int count = 0;
 
-  List<Product> products = [
-
-    Product(name: 'Product 1', price: 10.99),
-    Product(name: 'Product 2', price: 19.99),
-    Product(name: 'Product 3', price: 5.419),
-    Product(name: 'Product 4', price: 12.00),
-    Product(name: 'Product 5', price: 29.89),
-    Product(name: 'Product 6', price: 25.67),
-    Product(name: 'Product 7', price: 10.93),
-    Product(name: 'Product 8', price: 19.29),
-    Product(name: 'Product 9', price: 15.23),
-    Product(name: 'Product 10', price: 13.55),
-    Product(name: 'Product 11', price: 29.59),
-    Product(name: 'Product 12', price: 2.92),
-  ];
-
-  void _buyProduct(int index) {
-
+  void _incrementCounter() {
     setState(() {
-
-      products[index].quantity++;
-      products[index].isSelected = true;
-      if (products[index].quantity == 5) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Congratulations!'),
-              content: Text('You\'ve bought 5 ${products[index].name}!'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );},);
+      count++;
+      if (count >= 5) {
+        _showDialog();
       }
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    int totalQuantity = products.fold(0, (total, product) => total + product.quantity);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Product List'),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(products[index].name),
-            subtitle: Text('\$${products[index].price.toStringAsFixed(2)}'),
-            trailing: Column(
+  void _decrementCounter() {
+    setState(() {
+      if (count > 0) {
+        count--;
+      }
+    });
+  }
 
-              children: [
-                Text('Counter ${products[index].quantity}'),
-                ElevatedButton(
-                  onPressed: () => _buyProduct(index),
-                  child: Text("Buy Now"),
-                ),
-                ],
-               ),
-           );
-        },
-      ),
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Button pressed $count times."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-
-          final selectedProducts = products.where((product) => product.isSelected).toList();
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CartPage(selectedProducts: selectedProducts),
+                Navigator.of(context).pop();
+              },
             ),
-          );
-        },
-        backgroundColor: Colors.blue,
-        child: Icon(Icons.shopping_cart),
-      ),
+          ],
+        );
+      },
     );
   }
-}
-
-class CartPage extends StatelessWidget {
-  final List<Product> selectedProducts;
-
-  CartPage({required this.selectedProducts});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cart'),
-        centerTitle: true,
+        title: Text('Counter App'),
       ),
-      body: ListView.builder(
-        itemCount: selectedProducts.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(selectedProducts[index].name),
-            subtitle: Text('\$${selectedProducts[index].price.toStringAsFixed(2)}'),
-            trailing: Column(
-              children: [
-                Text('Quantity: ${selectedProducts[index].quantity}'),
+      body: Center(
+        child: Column(
+
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+
+            Text(
+              'Count:',
+              style: TextStyle(fontSize: 24),
+            ),
+            Text(
+              '$count',
+              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: _decrementCounter,
+                  child: Text('-'),
+                ),
+
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _incrementCounter,
+                  child: Text('+'),
+                ),
               ],
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
