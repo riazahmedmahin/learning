@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
 
 class MyImageFeed extends StatelessWidget {
 
+
   final List<String> dummyImageUrls = List.generate(
     10,
         (index) => "https://via.placeholder.com/150",
