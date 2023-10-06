@@ -38,6 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
       SnackBar(
         content: Text('Selected Size: $size'),
         duration: Duration(seconds: 3),
+
       ),
     );
   }
