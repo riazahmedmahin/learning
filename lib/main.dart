@@ -54,7 +54,7 @@ class _MyScreenState extends State<MyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Selectable List'),
+        title: Text('Selection Screen'),
       ),
       body: ListView.builder(
         itemCount: itemList.length,
