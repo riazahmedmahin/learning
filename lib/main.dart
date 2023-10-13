@@ -8,53 +8,45 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHomePage(),
+      home: MyScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyScreen extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
-
+  _MyScreenState createState() => _MyScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  String selectedSize = '';
-  Map<String, Color> buttonColors = {
-    'Small': Colors.red,
-    'Medium': Colors.green,
-    'Large': Colors.blue,
-    'XL': Colors.orange,
-    'XXL': Colors.purple,
-    'XXXL': Colors.teal,
-  };
+class _MyScreenState extends State<MyScreen> {
+  List<String> itemList = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"];
+  List<bool> selectedItems = List.generate(5, (index) => false);
 
-  void _changeColorAndShowSnackbar(String size) {
+  void toggleSelection(int index) {
     setState(() {
-      selectedSize = size;
+      selectedItems[index] = !selectedItems[index];
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Selected Size: $size'),
-        duration: Duration(seconds: 3),
-
-      ),
-    );
   }
 
-  Widget _buildSizeButton(String size) {
-    return ElevatedButton(
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(
-          size == selectedSize ? buttonColors[size] : Colors.grey,
-        ),
-      ),
-      onPressed: () {
-        _changeColorAndShowSnackbar(size);
+  void showSelectedItemsDialog() {
+    int selectedCount = selectedItems.where((element) => element).length;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selected Items'),
+          content: Text('Number of selected items: $selectedCount'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
       },
-      child: Text(size),
     );
   }
 
@@ -62,46 +54,25 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Size Selector'),
-        centerTitle: true,
+        title: Text('Selectable List'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    _buildSizeButton('Small'),
-                    SizedBox(width: 30,),
-                    _buildSizeButton('Medium'),
-                    SizedBox(width: 30,),
-                    _buildSizeButton('Large'),
-                    SizedBox(width: 30,),
-                    _buildSizeButton('XL'),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20), // Add some spacing between the rows
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    _buildSizeButton('XXL'),
-                    SizedBox(width: 30,),
-                    _buildSizeButton('XXXL'),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+      body: ListView.builder(
+        itemCount: itemList.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(itemList[index]),
+            tileColor: selectedItems[index] ? Colors.blue : null,
+            onTap: () {
+              toggleSelection(index);
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showSelectedItemsDialog();
+        },
+        child: Icon(Icons.check),
       ),
     );
   }
