@@ -1,185 +1,106 @@
-
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:modlive/photo_details_screen.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ListScreen(),
-  ));
+  runApp(MyApp());
 }
 
-class ListItem {
-  dynamic title;
-  dynamic subtitle;
-
-  ListItem(this.title, this.subtitle);
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Photo Gallery App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: PhotoListScreen(),
+    );
+  }
 }
 
-class ListScreen extends StatefulWidget {
-  const ListScreen({super.key});
+class PhotoListScreen extends StatefulWidget {
+  @override
+  _PhotoListScreenState createState() => _PhotoListScreenState();
+}
+
+class _PhotoListScreenState extends State<PhotoListScreen> {
+  List<Photo> photos = [];
 
   @override
-  _ListScreenState createState() => _ListScreenState();
-}
+  void initState() {
+    super.initState();
+    fetchPhotos();
+  }
 
-class _ListScreenState extends State<ListScreen> {
-  List<ListItem> items = [
+  Future<void> fetchPhotos() async {
+    try {
+      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
+      if (response.statusCode == 200) {
+        final List<dynamic> parsedData = json.decode(response.body);
+        setState(() {
+          photos = parsedData.map((json) => Photo.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('Failed to load photos');
+      }
+    } catch (e) {
+      print('Error: $e');
 
-  ];
-
-  TextEditingController newTitleController = TextEditingController();
-  TextEditingController newSubtitleController = TextEditingController();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(onPressed: (){}, icon: const Icon(Icons.search, color: Colors.blue,))
-        ],
+        title: Text('Photo Gallery App'),
       ),
-      body: ListView(
-        children: [
-          Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: newTitleController,
-                  decoration: const InputDecoration(labelText: "Title", border: OutlineInputBorder(),),
+      body: photos.isNotEmpty
+          ? ListView.separated(
+        itemCount: photos.length,
+        separatorBuilder: (context, index) => Divider(), // Add a Divider between items
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(photos[index].title),
+            leading: Image.network(photos[index].thumbnailUrl),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PhotoDetailScreen(photo: photos[index]),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: newSubtitleController,
-                  decoration: const InputDecoration(labelText: "Subtitle", border: OutlineInputBorder(),),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _addItem();
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                child: const Text("Add"),
-              ),
-            ],
-          ),
-
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.redAccent,
-                ),
-                title: Text('${items[index].title}'),
-                subtitle: Text('${items[index].subtitle}'),
-                trailing: Icon(Icons.arrow_forward_outlined),
-                onLongPress: () {
-                  _showOptionsDialog(context, index);
-                },
               );
             },
-          ),
+          );
+        },
+      )
 
-        ],
+          : Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
+}
 
-  void _showOptionsDialog(BuildContext context, int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Alert"),
+class Photo {
+  final int id;
+  final String title;
+  final String thumbnailUrl;
+  final String url;
 
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                title: const Text("Edit"),
-                onTap: () {
-                  Navigator.pop(context); // Close the AlertDialog
-                  _showEditBottomSheet(context, index);
-                },
-              ),
-              ListTile(
-                title: const Text("Delete"),
-                onTap: () {
-                  Navigator.pop(context); // Close the AlertDialog
-                  _deleteItem(index);
-                },
-              ),
-            ],
-          ),
-        );
-      },
+  Photo({required this.id, required this.title, required this.thumbnailUrl, required this.url});
+
+  factory Photo.fromJson(Map<String, dynamic> json) {
+    return Photo(
+
+      id: json['id'],
+      title: json['title'],
+      thumbnailUrl: json['thumbnailUrl'],
+      url: json['url'],
+
     );
-  }
-
-  void _showEditBottomSheet(BuildContext context, int index) {
-    TextEditingController titleController = TextEditingController(text: items[index].title);
-    TextEditingController subtitleController = TextEditingController(text: items[index].subtitle);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: "Title", border: OutlineInputBorder()),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  controller: subtitleController,
-                  decoration: const InputDecoration(labelText: "Subtitle", border: OutlineInputBorder()),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    items[index].title = titleController.text;
-                    items[index].subtitle = subtitleController.text;
-                  });
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                child: const Text("Edit Done"),
-
-              ),
-              const SizedBox(height: 152,)
-            ],
-          ),
-        );
-      },
-    );
-  }
-  void _addItem() {
-    final String title = newTitleController.text;
-    final String subtitle = newSubtitleController.text;
-    if (title.isNotEmpty && subtitle.isNotEmpty) {
-      setState(() {
-        items.add(ListItem(title, subtitle));
-      });
-      newTitleController.clear();
-      newSubtitleController.clear();
-    }
-  }
-  void _deleteItem(int index) {
-    setState(() {
-      items.removeAt(index);
-    });
   }
 }
