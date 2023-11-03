@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:modlive/photo_details_screen.dart';
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -11,96 +9,96 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Photo Gallery App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: PhotoListScreen(),
+      home: WeatherList(),
     );
   }
 }
 
-class PhotoListScreen extends StatefulWidget {
+class WeatherList extends StatefulWidget {
   @override
-  _PhotoListScreenState createState() => _PhotoListScreenState();
+  _WeatherListState createState() => _WeatherListState();
 }
 
-class _PhotoListScreenState extends State<PhotoListScreen> {
-  List<Photo> photos = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPhotos();
-  }
-
-  Future<void> fetchPhotos() async {
-    try {
-      final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/photos'));
-      if (response.statusCode == 200) {
-        final List<dynamic> parsedData = json.decode(response.body);
-        setState(() {
-          photos = parsedData.map((json) => Photo.fromJson(json)).toList();
-        });
-      } else {
-        throw Exception('Failed to load photos');
-      }
-    } catch (e) {
-      print('Error: $e');
-
-    }
-  }
+class _WeatherListState extends State<WeatherList> {
+  List<Map<String, dynamic>> citiesWeather = [
+    {
+      "city": "New York",
+      "temperature": 20,
+      "condition": "Clear",
+      "humidity": 60,
+      "windSpeed": 5.5,
+    },
+    {
+      "city": "Los Angeles",
+      "temperature": 25,
+      "condition": "Sunny",
+      "humidity": 50,
+      "windSpeed": 6.8,
+    },
+    {
+      "city": "London",
+      "temperature": 15,
+      "condition": "Partly Cloudy",
+      "humidity": 70,
+      "windSpeed": 4.2,
+    },
+    {
+      "city": "Tokyo",
+      "temperature": 28,
+      "condition": "Rainy",
+      "humidity": 75,
+      "windSpeed": 8.0,
+    },
+    {
+      "city": "Sydney",
+      "temperature": 22,
+      "condition": "Cloudy",
+      "humidity": 55,
+      "windSpeed": 7.3,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Photo Gallery App'),
+        title: const Text('Weather Info App'),
       ),
-      body: photos.isNotEmpty
-          ? ListView.separated(
-        itemCount: photos.length,
-        separatorBuilder: (context, index) => Divider(), // Add a Divider between items
+      body: ListView.builder(
+        itemCount: citiesWeather.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(photos[index].title),
-            leading: Image.network(photos[index].thumbnailUrl),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PhotoDetailScreen(photo: photos[index]),
-                ),
-              );
-            },
-          );
+          return WeatherCard(cityWeather: citiesWeather[index]);
         },
-      )
-
-          : Center(
-        child: CircularProgressIndicator(),
       ),
     );
   }
 }
 
-class Photo {
-  final int id;
-  final String title;
-  final String thumbnailUrl;
-  final String url;
+class WeatherCard extends StatelessWidget {
+  final Map<String, dynamic> cityWeather;
 
-  Photo({required this.id, required this.title, required this.thumbnailUrl, required this.url});
+  WeatherCard({required this.cityWeather});
 
-  factory Photo.fromJson(Map<String, dynamic> json) {
-    return Photo(
-
-      id: json['id'],
-      title: json['title'],
-      thumbnailUrl: json['thumbnailUrl'],
-      url: json['url'],
-
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(5.0),
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'City: ${cityWeather['city']}',
+              style: TextStyle(fontSize: 17),
+            ),
+            Text('Temperature: ${cityWeather['temperature']}°C' , style: TextStyle(color: Colors.grey),),
+            Text('Condition: ${cityWeather['condition']}', style: TextStyle(color: Colors.grey),),
+            Text('Humidity: ${cityWeather['humidity']}%', style: TextStyle(color: Colors.grey),),
+            Text('Wind Speed: ${cityWeather['windSpeed']} km/h', style: TextStyle(color: Colors.grey),),
+          ],
+        ),
+      ),
     );
   }
 }
